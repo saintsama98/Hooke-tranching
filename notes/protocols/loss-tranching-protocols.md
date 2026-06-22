@@ -9,7 +9,7 @@ strategy → IdleCDO (tracks virtual price) → split by trancheAPRSplitRatio
         → AA token (ERC-20, senior)   BB token (ERC-20, junior, first-loss)
 ```
 
-The BB tranche absorbs loss first; the AA tranche is affected only after the BB tranche's total value is exhausted, giving strict subordination. The `trancheAPRSplitRatio` adjusts the yield division as a function of the senior share of total value, which is a pricing mechanism rather than a coverage test. Provides ②, ③ (passive), and ⑤ (perpetual, ERC-4626-compliant); does not provide ④. Sources: [README](https://github.com/Idle-Labs/idle-tranches/blob/master/README.md), [Adaptive Yield Split](https://docs.idle.finance/products/yield-tranches/adaptive-yield-split).
+The BB tranche absorbs loss first; the AA tranche is affected only after the BB tranche's total value is exhausted, giving strict subordination. The `trancheAPRSplitRatio` adjusts the yield division as a function of the senior share of total value, which is a pricing mechanism rather than a coverage test. Provides ②, ③ (passive), and ⑤ (perpetual, ERC-4626-compliant); does not provide ④. Sources: [README](https://github.com/Idle-Labs/idle-tranches/blob/master/README.md), [Adaptive Yield Split](https://docs.idle.finance/products/yield-tranches/adaptive-yield-split). A full implementation-level review is in [`../code-study/idle-finance/`](../code-study/idle-finance/index.md).
 
 ## BarnBridge SMART Yield (discontinued)
 
@@ -17,7 +17,7 @@ The senior claim was issued as sBONDs (ERC-721; fixed, dated, and guaranteed) an
 
 ## Centrifuge (DROP / TIN)
 
-DROP (ERC-20, senior) and TIN (ERC-20, junior, first-loss) are issued against a pool valued as off-chain real-world-asset net asset value plus an on-chain reserve. A minimum-subordination-ratio test halts new DROP issuance when the TIN share falls below a floor, until the share is restored. This is the closest on-chain analogue to component ④, but the response is passive (issuance is suspended) rather than active (cash flow is diverted to de-lever the senior claim); that distinction is the gap the proposed standard addresses. Version 3 reissues the tranches as ERC-7540 vaults, a standard Centrifuge co-authored. Provides ②, ③, partial ④, and ⑤. Sources: [A Tale of Two Tokens](https://medium.com/centrifuge/a-tale-of-two-tokens-introducing-tin-drop-our-two-investment-tokens-d4c7342c799a), [RWA token standards](https://centrifuge.io/blog/rwa-token-standards).
+DROP (ERC-20, senior) and TIN (ERC-20, junior, first-loss) are issued against a pool valued as off-chain real-world-asset net asset value plus an on-chain reserve. A minimum-subordination-ratio test halts new DROP issuance when the TIN share falls below a floor, until the share is restored. This is the closest on-chain analogue to component ④, but the response is passive (issuance is suspended) rather than active (cash flow is diverted to de-lever the senior claim); that distinction is the gap the proposed standard addresses. Version 3 reissues the tranches as ERC-7540 vaults, a standard Centrifuge co-authored. Provides ②, ③, partial ④, and ⑤. Sources: [A Tale of Two Tokens](https://medium.com/centrifuge/a-tale-of-two-tokens-introducing-tin-drop-our-two-investment-tokens-d4c7342c799a), [RWA token standards](https://centrifuge.io/blog/rwa-token-standards). A full implementation-level review is in [`../code-study/centrifuge/`](../code-study/centrifuge/index.md).
 
 ## Goldfinch
 

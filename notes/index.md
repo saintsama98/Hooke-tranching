@@ -39,7 +39,14 @@ Each surveyed protocol implements a subset of the reference architecture.
 - [`protocols/rwa-securitization-entrants.md`](./protocols/rwa-securitization-entrants.md) — Untangled, Galaxy CLO, Tradable
 - [`protocols/standards-adoption-matrix.md`](./protocols/standards-adoption-matrix.md) — Standards adoption across surveyed protocols
 
-## 4. Synthesis — `synthesis/`
+## 4. Code study — `code-study/`
+
+Implementation-level reviews of individual protocol codebases, each mapped onto the proposed standard.
+
+- [`code-study/index.md`](./code-study/index.md) — Section overview
+- [`code-study/idle-finance/`](./code-study/idle-finance/index.md) — Idle Finance: the `IdleCDO` engine, the Adaptive Yield Split, and the Ethena (sUSDe) integration
+
+## 5. Synthesis — `synthesis/`
 
 - [`synthesis/index.md`](./synthesis/index.md) — Section overview
 - [`synthesis/substrate-fork.md`](./synthesis/substrate-fork.md) — Token-substrate selection: ERC-3475 versus ERC-6909 with ERC-7201
