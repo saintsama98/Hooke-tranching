@@ -1,0 +1,30 @@
+%% Hooke-Centrifuge — generic credit harness, all components connected.
+%% Waterfall is an external seam (owned separately), shown but not detailed.
+flowchart TB
+  LP(["Liquidity Providers"])
+  ADMIN(["Pool Admin / Manager"])
+  BORROWER(["Borrower"])
+
+  subgraph HARNESS["Generic Credit Harness (we build)"]
+    direction TB
+    POOL["Pool<br/>currency custody + reserve<br/>+ tranche registry"]
+    SENIOR["Senior tranche (id 0)"]
+    JUNIOR["Junior tranche (id n)"]
+    LOANBOOK["Loan Book<br/>fund · repay · default"]
+    POOL --> SENIOR
+    POOL --> JUNIOR
+    POOL --> LOANBOOK
+  end
+
+  NAV["INavSource<br/>totalValue()"]
+  WF["IWaterfall — seam (yours)<br/>distribute · allocateLoss"]
+
+  LP -->|"deposit currency"| POOL
+  POOL -->|"mint / redeem shares"| LP
+  ADMIN -->|"configure · fund loans"| POOL
+  BORROWER -->|"repay / default"| LOANBOOK
+  LOANBOOK -.->|"implements"| NAV
+  LOANBOOK -->|"cash in"| POOL
+  POOL -->|"route events"| WF
+  NAV -->|"totalValue"| WF
+  WF -->|"write tranche claims"| POOL

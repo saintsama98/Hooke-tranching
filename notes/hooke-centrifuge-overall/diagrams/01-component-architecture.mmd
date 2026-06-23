@@ -1,0 +1,38 @@
+%% Hooke-Centrifuge — contract / interface architecture of the harness.
+classDiagram
+  class Pool {
+    +ERC20 currency
+    +uint256 reserve
+    +Tranche[] tranches
+    +deposit(trancheId, amount)
+    +redeem(trancheId, shares)
+    +onRepay(amount)
+    +onDefault(amount)
+  }
+  class Tranche {
+    +uint256 seniority
+    +uint256 obligation
+    +uint256 claimable
+    +mint(to, shares)
+    +burn(from, shares)
+  }
+  class LoanBook {
+    +fund(borrower, amount)
+    +repay(amount)
+    +recordDefault(amount)
+    +totalValue() uint256
+  }
+  class INavSource {
+    <<interface>>
+    +totalValue() uint256
+  }
+  class IWaterfall {
+    <<interface>>
+    +distribute(cashIn)
+    +allocateLoss(amount)
+  }
+  Pool "1" o-- "n" Tranche : registry
+  Pool --> LoanBook : funds and collects
+  Pool ..> IWaterfall : routes events
+  LoanBook ..|> INavSource : implements
+  IWaterfall ..> Pool : reads state, writes claims

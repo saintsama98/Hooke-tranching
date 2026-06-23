@@ -1,0 +1,18 @@
+%% Hooke-Centrifuge — how surveyed private-credit protocols map onto the generic slots.
+flowchart LR
+  subgraph G["Generic harness slot"]
+    direction TB
+    P["Pool / custody"]
+    T["Tranche tokens"]
+    N["NAV source"]
+    L["Loan book"]
+    R["Redemption"]
+    W["Waterfall"]
+  end
+
+  P --- PEx["Centrifuge: tranche + reserve<br/>Maple: Pool + PoolManager<br/>Goldfinch: Senior/TranchedPool<br/>TrueFi: Credit Vault"]
+  T --- TEx["DROP/TIN · A/B/C<br/>FIDU/PoolToken · SOT/JOT"]
+  N --- NEx["Centrifuge feed · Untangled risk oracle<br/>Maple / Goldfinch on-chain accrual"]
+  L --- LEx["loan NFTs · CreditLine<br/>LoanManager · per-deal bond"]
+  R --- REx["epoch · WithdrawalManager queue"]
+  W --- WEx["present in every protocol,<br/>standardized in NONE"]

@@ -1,0 +1,24 @@
+%% Hooke-Centrifuge — loan lifecycle and how cash/NAV events reach the waterfall seam.
+sequenceDiagram
+  actor ADMIN as Pool Admin
+  actor BRW as Borrower
+  participant Pool
+  participant LoanBook
+  participant WF as IWaterfall (seam)
+
+  ADMIN->>Pool: fund loan
+  Pool->>LoanBook: fund(borrower, amount)
+  LoanBook-->>BRW: currency disbursed
+
+  Note over BRW,WF: Repayment
+  BRW->>LoanBook: repay(amount)
+  LoanBook->>Pool: onRepay(amount)
+  Pool->>WF: distribute(cashIn)
+  WF->>Pool: write tranche claims (senior first)
+
+  Note over BRW,WF: Default / impairment
+  BRW--xLoanBook: misses payment
+  ADMIN->>LoanBook: recordDefault(amount)
+  LoanBook->>Pool: onDefault(amount)
+  Pool->>WF: allocateLoss(amount)
+  WF->>Pool: write down tranches (junior first)

@@ -1,0 +1,16 @@
+%% Hooke-Centrifuge — the two pluggable seams and what crosses each boundary.
+flowchart LR
+  subgraph HARNESS["Harness (we build)"]
+    POOL["Pool + Tranches + Reserve"]
+    LB["Loan Book"]
+  end
+  subgraph EXT["Pluggable (swappable / yours)"]
+    NAV["INavSource"]
+    WF["IWaterfall<br/>YOUR design"]
+  end
+
+  LB -.->|"implements"| NAV
+  NAV -->|"totalValue()"| POOL
+  POOL -->|"reads: trancheCount, obligation,<br/>totalAssets, reserve"| WF
+  POOL -->|"calls: distribute / allocateLoss"| WF
+  WF -->|"writes: claimable / obligation,<br/>moves reserve"| POOL

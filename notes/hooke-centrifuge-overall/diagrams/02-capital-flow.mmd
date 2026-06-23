@@ -1,0 +1,18 @@
+%% Hooke-Centrifuge — LP capital flow (deposit / redeem).
+sequenceDiagram
+  actor LP as Liquidity Provider
+  participant Pool
+  participant Tranche
+  participant Reserve as Reserve (in Pool)
+
+  Note over LP,Reserve: Deposit
+  LP->>Pool: deposit(trancheId, amount)
+  Pool->>Reserve: hold currency
+  Pool->>Tranche: mint(LP, shares)
+  Tranche-->>LP: tranche shares
+
+  Note over LP,Reserve: Redeem (synchronous in v0)
+  LP->>Pool: redeem(trancheId, shares)
+  Pool->>Tranche: burn(LP, shares)
+  Pool->>Reserve: check available liquidity
+  Reserve-->>LP: currency, if liquid

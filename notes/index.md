@@ -45,12 +45,20 @@ Implementation-level reviews of individual protocol codebases, each mapped onto 
 
 - [`code-study/index.md`](./code-study/index.md) — Section overview
 - [`code-study/idle-finance/`](./code-study/idle-finance/index.md) — Idle Finance: the `IdleCDO` engine, the Adaptive Yield Split, and the Ethena (sUSDe) integration
+- [`code-study/centrifuge/`](./code-study/centrifuge/index.md) — Centrifuge: the Tinlake lender module (Assessor + Coordinator) and the v3 ERC-7540 layer
 
 ## 5. Synthesis — `synthesis/`
 
 - [`synthesis/index.md`](./synthesis/index.md) — Section overview
 - [`synthesis/substrate-fork.md`](./synthesis/substrate-fork.md) — Token-substrate selection: ERC-3475 versus ERC-6909 with ERC-7201
 - [`synthesis/open-questions-and-next.md`](./synthesis/open-questions-and-next.md) — Outstanding research questions
+
+## 6. Harness design — `hooke-centrifuge/`
+
+The generic credit harness (Centrifuge-style use case) into which the waterfall engine plugs; the concrete substrate the spec interface is distilled from.
+
+- [`hooke-centrifuge/README.md`](./hooke-centrifuge/README.md) — Section overview
+- [`hooke-centrifuge/harness-architecture.md`](./hooke-centrifuge/harness-architecture.md) — Architecture document, with validated Mermaid diagrams in [`hooke-centrifuge/diagrams/`](./hooke-centrifuge/diagrams/)
 
 ---
 
