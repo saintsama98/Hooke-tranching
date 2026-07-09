@@ -1,12 +1,13 @@
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','tertiaryColor':'#ffffff','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 %% Hooke-Centrifuge — the two pluggable seams and what crosses each boundary.
 flowchart LR
-  subgraph HARNESS["Harness (we build)"]
-    POOL["Pool + Tranches + Reserve"]
-    LB["Loan Book"]
+  subgraph HARNESS["Harness (fixed generic core)"]
+    POOL["Pool + Tranches + Reserve<br/>state and custody"]
+    LB["Loan Book<br/>credit assets"]
   end
-  subgraph EXT["Pluggable (swappable / yours)"]
-    NAV["INavSource"]
-    WF["IWaterfall<br/>YOUR design"]
+  subgraph EXT["Pluggable seams (swappable, per use case)"]
+    NAV["INavSource<br/>value adapter"]
+    WF["IWaterfall<br/>intended spec"]
   end
 
   LB -.->|"implements"| NAV
@@ -14,3 +15,5 @@ flowchart LR
   POOL -->|"reads: trancheCount, obligation,<br/>totalAssets, reserve"| WF
   POOL -->|"calls: distribute / allocateLoss"| WF
   WF -->|"writes: claimable / obligation,<br/>moves reserve"| POOL
+
+  LEGEND["What each seam swaps<br/>Swapping INavSource changes what the assets are (feed, oracle, accrual).<br/>Swapping IWaterfall changes the distribution and loss policy.<br/>The harness commits only to the reads and the two calls shown, and stays<br/>unchanged across either swap; the waterfall design may reshape its side of the boundary."]

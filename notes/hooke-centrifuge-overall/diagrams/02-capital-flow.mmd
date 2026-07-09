@@ -1,18 +1,21 @@
-%% Hooke-Centrifuge — LP capital flow (deposit / redeem).
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','fontFamily':'monospace','actorBkg':'#ffffff','actorBorder':'#000000','actorTextColor':'#000000','actorLineColor':'#000000','signalColor':'#000000','signalTextColor':'#000000','noteBkgColor':'#ffffff','noteBorderColor':'#000000','noteTextColor':'#000000','labelBoxBkgColor':'#ffffff','labelBoxBorderColor':'#000000','labelTextColor':'#000000','activationBkgColor':'#ffffff','activationBorderColor':'#000000'}}}%%
+%% Hooke-Centrifuge - liquidity-provider capital flow (deposit / redeem).
 sequenceDiagram
   actor LP as Liquidity Provider
   participant Pool
   participant Tranche
   participant Reserve as Reserve (in Pool)
 
-  Note over LP,Reserve: Deposit
+  Note over LP,Reserve: DEPOSIT - currency enters the reserve, tranche shares are minted
   LP->>Pool: deposit(trancheId, amount)
-  Pool->>Reserve: hold currency
+  Pool->>Reserve: hold currency in reserve
   Pool->>Tranche: mint(LP, shares)
-  Tranche-->>LP: tranche shares
+  Tranche-->>LP: tranche shares (a claim on the pool)
 
-  Note over LP,Reserve: Redeem (synchronous in v0)
+  Note over LP,Reserve: REDEEM (synchronous in v0) - shares burned, currency returned only if the reserve is liquid
   LP->>Pool: redeem(trancheId, shares)
   Pool->>Tranche: burn(LP, shares)
   Pool->>Reserve: check available liquidity
-  Reserve-->>LP: currency, if liquid
+  Reserve-->>LP: currency, only if liquid
+
+  Note over LP,Reserve: If the reserve is short, redemption cannot settle immediately. Production systems replace this with a redemption queue (see Section 7).

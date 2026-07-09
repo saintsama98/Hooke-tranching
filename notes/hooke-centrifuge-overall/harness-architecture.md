@@ -13,24 +13,25 @@ Each diagram below is embedded as Mermaid and also rendered to SVG in [`./diagra
 The complete harness, with both seams shown. Rendered: [`diagrams/00-overview-generic.svg`](./diagrams/00-overview-generic.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','secondaryBorderColor':'#000000','tertiaryColor':'#ffffff','tertiaryTextColor':'#000000','tertiaryBorderColor':'#000000','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 flowchart TB
-  LP(["Liquidity Providers"])
-  ADMIN(["Pool Admin / Manager"])
-  BORROWER(["Borrower"])
+  LP(["Liquidity Providers<br/>supply currency, hold tranche shares"])
+  ADMIN(["Pool Admin / Manager<br/>configures the pool, funds loans"])
+  BORROWER(["Borrower<br/>repays or defaults"])
 
-  subgraph HARNESS["Generic Credit Harness (we build)"]
+  subgraph HARNESS["Generic Credit Harness (fixed generic core)"]
     direction TB
     POOL["Pool<br/>currency custody + reserve<br/>+ tranche registry"]
-    SENIOR["Senior tranche (id 0)"]
-    JUNIOR["Junior tranche (id n)"]
+    SENIOR["Senior tranche (id 0)<br/>paid first, loss last"]
+    JUNIOR["Junior tranche (id n)<br/>paid last, loss first"]
     LOANBOOK["Loan Book<br/>fund · repay · default"]
     POOL --> SENIOR
     POOL --> JUNIOR
     POOL --> LOANBOOK
   end
 
-  NAV["INavSource<br/>totalValue()"]
-  WF["IWaterfall — seam (yours)<br/>distribute · allocateLoss"]
+  NAV["INavSource — value seam<br/>totalValue() returns one net-asset-value number"]
+  WF["IWaterfall — external seam (intended spec)<br/>distribute · allocateLoss<br/>the only component the standard specifies"]
 
   LP -->|"deposit currency"| POOL
   POOL -->|"mint / redeem shares"| LP
@@ -38,9 +39,11 @@ flowchart TB
   BORROWER -->|"repay / default"| LOANBOOK
   LOANBOOK -.->|"implements"| NAV
   LOANBOOK -->|"cash in"| POOL
-  POOL -->|"route events"| WF
+  POOL -->|"route cash and loss events"| WF
   NAV -->|"totalValue"| WF
   WF -->|"write tranche claims"| POOL
+
+  LEGEND["How to read this diagram<br/>Solid arrow = value moved or a call made.<br/>Dashed arrow = an interface implemented.<br/>Cash descends the tranches senior-first; loss ascends junior-first.<br/>The boxed harness is generic and fixed; the two seams (INavSource, IWaterfall)<br/>are the only points where a specific use case plugs in."]
 ```
 
 ## 2. Prior-art synthesis
@@ -48,6 +51,7 @@ flowchart TB
 The component set is derived from the protocols surveyed. Each occupies the same generic slots; only the waterfall slot is universally present yet nowhere standardised. Rendered: [`diagrams/05-protocol-synthesis.svg`](./diagrams/05-protocol-synthesis.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','tertiaryColor':'#ffffff','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 flowchart LR
   subgraph G["Generic harness slot"]
     direction TB
@@ -59,12 +63,14 @@ flowchart LR
     W["Waterfall"]
   end
 
-  P --- PEx["Centrifuge: tranche + reserve<br/>Maple: Pool + PoolManager<br/>Goldfinch: Senior/TranchedPool<br/>TrueFi: Credit Vault"]
+  P --- PEx["Centrifuge: tranche + reserve<br/>Maple: Pool + PoolManager<br/>Goldfinch: Senior / TranchedPool<br/>TrueFi: Credit Vault"]
   T --- TEx["DROP/TIN · A/B/C<br/>FIDU/PoolToken · SOT/JOT"]
   N --- NEx["Centrifuge feed · Untangled risk oracle<br/>Maple / Goldfinch on-chain accrual"]
   L --- LEx["loan NFTs · CreditLine<br/>LoanManager · per-deal bond"]
   R --- REx["epoch · WithdrawalManager queue"]
   W --- WEx["present in every protocol,<br/>standardized in NONE"]
+
+  FIND["How to read this diagram<br/>Each surveyed protocol fills the same generic slots; the right column lists how a<br/>given protocol implements that slot. The waterfall slot is the exception:<br/>universally present, nowhere standardised. That gap is the target of the proposed standard."]
 ```
 
 Two tranching styles appear: **pool-level** (Centrifuge, TrueFi, Maple — the pool is divided into tranches and a liquidity provider selects one) and **deal-level** (Goldfinch, Credix — the junior invests per deal and a senior portion is added from a joint pool by a leverage ratio). Pool-level is the more general base and is the target of this harness; deal-level is a specialisation that can be layered above it.
@@ -76,6 +82,7 @@ Sources: [Maple architecture](https://docs.maple.finance/technical-resources/pro
 The fixed generic core (the harness). Rendered: [`diagrams/01-component-architecture.svg`](./diagrams/01-component-architecture.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','tertiaryColor':'#ffffff','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','noteBkgColor':'#ffffff','noteBorderColor':'#000000','noteTextColor':'#000000','fontFamily':'monospace'}}}%%
 classDiagram
   class Pool {
     +ERC20 currency
@@ -108,11 +115,15 @@ classDiagram
     +distribute(cashIn)
     +allocateLoss(amount)
   }
-  Pool "1" o-- "n" Tranche : registry
+  Pool "1" o-- "n" Tranche : registry (index 0 = most senior)
   Pool --> LoanBook : funds and collects
-  Pool ..> IWaterfall : routes events
+  Pool ..> IWaterfall : routes cash and loss events
   LoanBook ..|> INavSource : implements
   IWaterfall ..> Pool : reads state, writes claims
+
+  note "The harness knows only currency in, currency out, and one NAV number. INavSource and IWaterfall are the two swappable seams; every other class is generic and fixed."
+  note for IWaterfall "Intended spec: the distribution, loss-allocation and coverage policy that mutates tranche state. Specified separately, then distilled into the ERC interface."
+  note for INavSource "Swappable value adapter: a price feed, risk oracle, or on-chain accrual — each presents the same totalValue() boundary."
 ```
 
 - **Currency** — one ERC-20 stablecoin (mock in the proof of concept). A single denomination; no swaps in the harness.
@@ -125,23 +136,26 @@ classDiagram
 Deposit and redemption. Redemption is synchronous from the reserve in the first version; production systems queue it (see Section 7). Rendered: [`diagrams/02-capital-flow.svg`](./diagrams/02-capital-flow.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','fontFamily':'monospace','actorBkg':'#ffffff','actorBorder':'#000000','actorTextColor':'#000000','actorLineColor':'#000000','signalColor':'#000000','signalTextColor':'#000000','noteBkgColor':'#ffffff','noteBorderColor':'#000000','noteTextColor':'#000000','labelBoxBkgColor':'#ffffff','labelBoxBorderColor':'#000000','labelTextColor':'#000000','activationBkgColor':'#ffffff','activationBorderColor':'#000000'}}}%%
 sequenceDiagram
   actor LP as Liquidity Provider
   participant Pool
   participant Tranche
   participant Reserve as Reserve (in Pool)
 
-  Note over LP,Reserve: Deposit
+  Note over LP,Reserve: DEPOSIT - currency enters the reserve, tranche shares are minted
   LP->>Pool: deposit(trancheId, amount)
-  Pool->>Reserve: hold currency
+  Pool->>Reserve: hold currency in reserve
   Pool->>Tranche: mint(LP, shares)
-  Tranche-->>LP: tranche shares
+  Tranche-->>LP: tranche shares (a claim on the pool)
 
-  Note over LP,Reserve: Redeem (synchronous in v0)
+  Note over LP,Reserve: REDEEM (synchronous in v0) - shares burned, currency returned only if the reserve is liquid
   LP->>Pool: redeem(trancheId, shares)
   Pool->>Tranche: burn(LP, shares)
   Pool->>Reserve: check available liquidity
-  Reserve-->>LP: currency, if liquid
+  Reserve-->>LP: currency, only if liquid
+
+  Note over LP,Reserve: If the reserve is short, redemption cannot settle immediately. Production systems replace this with a redemption queue (see Section 7).
 ```
 
 ## 5. Loan lifecycle and the route to the waterfall
@@ -149,6 +163,7 @@ sequenceDiagram
 How fund, repay, and default events reach the waterfall seam. The harness owns the events; the waterfall owns the policy that decides the resulting tranche movements. Rendered: [`diagrams/03-loan-lifecycle.svg`](./diagrams/03-loan-lifecycle.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','fontFamily':'monospace','actorBkg':'#ffffff','actorBorder':'#000000','actorTextColor':'#000000','actorLineColor':'#000000','signalColor':'#000000','signalTextColor':'#000000','noteBkgColor':'#ffffff','noteBorderColor':'#000000','noteTextColor':'#000000','labelBoxBkgColor':'#ffffff','labelBoxBorderColor':'#000000','labelTextColor':'#000000','activationBkgColor':'#ffffff','activationBorderColor':'#000000'}}}%%
 sequenceDiagram
   actor ADMIN as Pool Admin
   actor BRW as Borrower
@@ -156,22 +171,25 @@ sequenceDiagram
   participant LoanBook
   participant WF as IWaterfall (seam)
 
+  Note over ADMIN,WF: FUND - currency leaves the pool for the borrower
   ADMIN->>Pool: fund loan
   Pool->>LoanBook: fund(borrower, amount)
   LoanBook-->>BRW: currency disbursed
 
-  Note over BRW,WF: Repayment
+  Note over BRW,WF: REPAYMENT - cash arrives, distributed senior-first
   BRW->>LoanBook: repay(amount)
   LoanBook->>Pool: onRepay(amount)
   Pool->>WF: distribute(cashIn)
   WF->>Pool: write tranche claims (senior first)
 
-  Note over BRW,WF: Default / impairment
+  Note over BRW,WF: DEFAULT / IMPAIRMENT - loss recorded, absorbed junior-first
   BRW--xLoanBook: misses payment
   ADMIN->>LoanBook: recordDefault(amount)
   LoanBook->>Pool: onDefault(amount)
   Pool->>WF: allocateLoss(amount)
   WF->>Pool: write down tranches (junior first)
+
+  Note over ADMIN,WF: The harness only raises the two events (distribute, allocateLoss). The waterfall seam owns the policy that decides how tranche claims and obligations move.
 ```
 
 ## 6. The two seams
@@ -179,14 +197,15 @@ sequenceDiagram
 Both use-case-specific concerns are isolated behind interfaces, so they are swappable and the harness stays generic. Rendered: [`diagrams/04-seam-boundaries.svg`](./diagrams/04-seam-boundaries.svg).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','tertiaryColor':'#ffffff','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 flowchart LR
-  subgraph HARNESS["Harness (we build)"]
-    POOL["Pool + Tranches + Reserve"]
-    LB["Loan Book"]
+  subgraph HARNESS["Harness (fixed generic core)"]
+    POOL["Pool + Tranches + Reserve<br/>state and custody"]
+    LB["Loan Book<br/>credit assets"]
   end
-  subgraph EXT["Pluggable (swappable / yours)"]
-    NAV["INavSource"]
-    WF["IWaterfall<br/>YOUR design"]
+  subgraph EXT["Pluggable seams (swappable, per use case)"]
+    NAV["INavSource<br/>value adapter"]
+    WF["IWaterfall<br/>intended spec"]
   end
 
   LB -.->|"implements"| NAV
@@ -194,6 +213,8 @@ flowchart LR
   POOL -->|"reads: trancheCount, obligation,<br/>totalAssets, reserve"| WF
   POOL -->|"calls: distribute / allocateLoss"| WF
   WF -->|"writes: claimable / obligation,<br/>moves reserve"| POOL
+
+  LEGEND["What each seam swaps<br/>Swapping INavSource changes what the assets are (feed, oracle, accrual).<br/>Swapping IWaterfall changes the distribution and loss policy.<br/>The harness commits only to the reads and the two calls shown, and stays<br/>unchanged across either swap; the waterfall design may reshape its side of the boundary."]
 ```
 
 **NAV source seam — `INavSource`.** A single `totalValue()` returning the value of the loan book. Centrifuge uses a feed, Untangled a risk oracle, Maple and Goldfinch on-chain accrual; all present the same boundary. In the proof of concept it is a settable mock.

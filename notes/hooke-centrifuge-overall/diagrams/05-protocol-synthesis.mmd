@@ -1,3 +1,4 @@
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','tertiaryColor':'#ffffff','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 %% Hooke-Centrifuge — how surveyed private-credit protocols map onto the generic slots.
 flowchart LR
   subgraph G["Generic harness slot"]
@@ -10,9 +11,11 @@ flowchart LR
     W["Waterfall"]
   end
 
-  P --- PEx["Centrifuge: tranche + reserve<br/>Maple: Pool + PoolManager<br/>Goldfinch: Senior/TranchedPool<br/>TrueFi: Credit Vault"]
+  P --- PEx["Centrifuge: tranche + reserve<br/>Maple: Pool + PoolManager<br/>Goldfinch: Senior / TranchedPool<br/>TrueFi: Credit Vault"]
   T --- TEx["DROP/TIN · A/B/C<br/>FIDU/PoolToken · SOT/JOT"]
   N --- NEx["Centrifuge feed · Untangled risk oracle<br/>Maple / Goldfinch on-chain accrual"]
   L --- LEx["loan NFTs · CreditLine<br/>LoanManager · per-deal bond"]
   R --- REx["epoch · WithdrawalManager queue"]
   W --- WEx["present in every protocol,<br/>standardized in NONE"]
+
+  FIND["How to read this diagram<br/>Each surveyed protocol fills the same generic slots; the right column lists how a<br/>given protocol implements that slot. The waterfall slot is the exception:<br/>universally present, nowhere standardised. That gap is the target of the proposed standard."]

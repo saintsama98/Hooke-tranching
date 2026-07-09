@@ -46,3 +46,5 @@ In stress, the senior layer therefore receives a smaller distribution while the 
 | Three-or-more-tranche sequential waterfall | Attempted by Waterfall DeFi (now defunct) |
 
 Evidence is collected in [`../protocols/loss-tranching-protocols.md`](../protocols/loss-tranching-protocols.md). The normative core of the proposed standard is the sequence: compute the coverage ratios each epoch, evaluate them against governable triggers, and re-route the waterfall on breach. The triggers are calibration parameters rather than constants; see [`heuristics-vs-plumbing.md`](./heuristics-vs-plumbing.md).
+
+The at-scale prior-art benchmark for this mechanic — the per-tranche coverage ladder, the reinvestment-period interest-diversion cure, and the calibration levels — is recorded in [`clo-reference-implementation.md`](./clo-reference-implementation.md).

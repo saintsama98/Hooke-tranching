@@ -1,23 +1,24 @@
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#ffffff','primaryTextColor':'#000000','primaryBorderColor':'#000000','lineColor':'#000000','secondaryColor':'#ffffff','secondaryTextColor':'#000000','secondaryBorderColor':'#000000','tertiaryColor':'#ffffff','tertiaryTextColor':'#000000','tertiaryBorderColor':'#000000','clusterBkg':'#ffffff','clusterBorder':'#000000','edgeLabelBackground':'#ffffff','fontFamily':'monospace'}}}%%
 %% Hooke-Centrifuge — generic credit harness, all components connected.
-%% Waterfall is an external seam (owned separately), shown but not detailed.
+%% The waterfall is an external seam (specified separately), shown but not detailed.
 flowchart TB
-  LP(["Liquidity Providers"])
-  ADMIN(["Pool Admin / Manager"])
-  BORROWER(["Borrower"])
+  LP(["Liquidity Providers<br/>supply currency, hold tranche shares"])
+  ADMIN(["Pool Admin / Manager<br/>configures the pool, funds loans"])
+  BORROWER(["Borrower<br/>repays or defaults"])
 
-  subgraph HARNESS["Generic Credit Harness (we build)"]
+  subgraph HARNESS["Generic Credit Harness (fixed generic core)"]
     direction TB
     POOL["Pool<br/>currency custody + reserve<br/>+ tranche registry"]
-    SENIOR["Senior tranche (id 0)"]
-    JUNIOR["Junior tranche (id n)"]
+    SENIOR["Senior tranche (id 0)<br/>paid first, loss last"]
+    JUNIOR["Junior tranche (id n)<br/>paid last, loss first"]
     LOANBOOK["Loan Book<br/>fund · repay · default"]
     POOL --> SENIOR
     POOL --> JUNIOR
     POOL --> LOANBOOK
   end
 
-  NAV["INavSource<br/>totalValue()"]
-  WF["IWaterfall — seam (yours)<br/>distribute · allocateLoss"]
+  NAV["INavSource — value seam<br/>totalValue() returns one net-asset-value number"]
+  WF["IWaterfall — external seam (intended spec)<br/>distribute · allocateLoss<br/>the only component the standard specifies"]
 
   LP -->|"deposit currency"| POOL
   POOL -->|"mint / redeem shares"| LP
@@ -25,6 +26,8 @@ flowchart TB
   BORROWER -->|"repay / default"| LOANBOOK
   LOANBOOK -.->|"implements"| NAV
   LOANBOOK -->|"cash in"| POOL
-  POOL -->|"route events"| WF
+  POOL -->|"route cash and loss events"| WF
   NAV -->|"totalValue"| WF
   WF -->|"write tranche claims"| POOL
+
+  LEGEND["How to read this diagram<br/>Solid arrow = value moved or a call made.<br/>Dashed arrow = an interface implemented.<br/>Cash descends the tranches senior-first; loss ascends junior-first.<br/>The boxed harness is generic and fixed; the two seams (INavSource, IWaterfall)<br/>are the only points where a specific use case plugs in."]
