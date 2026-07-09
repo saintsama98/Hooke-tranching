@@ -1,4 +1,4 @@
-# waterfall_tranching-EVM-research
+# Hooke-Tranching generalization
 
 This repository is meant to keep a copy of discussions and notes that will progressively contribute to a generic Tranches-waterfall standard for ethereum and overall ecosystem for defi we aim to propose.
 
