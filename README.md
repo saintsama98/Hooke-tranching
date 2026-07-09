@@ -1,6 +1,6 @@
 # Hooke-Tranching generalization
 
-This repository is meant to keep a copy of discussions and notes that will progressively contribute to a generic Tranches-waterfall standard for ethereum and overall ecosystem for defi we aim to propose.
+This repository is meant to keep a copy of discussions and notes that will progressively contribute to a generic risk buffering using tranching as a SPV (Special Purpose Vehical) standard for securities and overall structured markets, tokens or tradables in defi.
 
 ## About | Roadmap
 
