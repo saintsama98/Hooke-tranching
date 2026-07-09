@@ -1,6 +1,6 @@
 ---
 eip: <to be assigned>
-title: Waterfall Tranching Standard
+title: CDO/CLO Waterfall Tranching Standard/ trancher workflow standard
 description: A generic interface for waterfall-based tranching of cash flows on EVM smart contracts.
 author: TBD (@saintsama98)
 discussions-to: <Ethereum Magicians topic URL — to be added>
