@@ -1,32 +1,57 @@
 # Contributing
 
-This is an open research repository. Contributions — corrections, sources, implementation work, review of the draft spec — are welcome, and **anyone is welcome to comment on an issue or pick one up entirely**.
+This is an open research repository on tranching. Corrections, better sources and new
+material are welcome, and anyone is welcome to comment on an issue or pick one up. The
+standards applied to submissions are set out in [`METHOD.md`](./METHOD.md) and are worth
+reading before opening a pull request.
 
 ## Ways to contribute
 
-- **Open an issue** — report an error, raise a design question, or propose a change. Issues are the open work-thread for this repo; feel free to claim one.
-- **Discuss the design** — substantive standard-level discussion belongs on the forum thread linked from the [README](./README.md), so the conversation stays with the canonical `discussions-to` venue.
-- **Open a pull request** — for spec edits, reference-implementation code, test vectors, or notes.
-
-## Pull-request workflow
-
-1. **Fork** this repository and clone your fork.
-2. Create a topic branch (`git checkout -b <short-description>`).
-3. Make your change. Keep the change focused; one concern per PR.
-4. For **spec changes**, update [`CHANGELOG.md`](./CHANGELOG.md) and bump the spec version where appropriate.
-5. For **code changes**, ensure the reference project builds and tests pass.
-6. Open the PR against `main` with a clear description of *what* changed and *why*.
+Open an issue to report an error, question a claim, or propose a protocol worth covering.
+Issues are the open work thread here. Open a pull request for a correction, an addition to
+an existing document, or a new protocol study.
 
 ## What goes where
 
-| Change type | Location |
-|-------------|----------|
-| The standard / spec text | [`spec/`](./spec/) |
-| Reference implementation + tests | [`reference/`](./reference/) |
-| Conformance vectors | [`test-vectors/`](./test-vectors/) |
-| Research notes, exploration, sources | [`notes/`](./notes/) |
-| Ecosystem/process research | [`external/`](./external/) |
+Every directory holds exactly one document. Additions extend the relevant document rather
+than adding a file beside it.
 
-## Licensing of contributions
+| Subject | Document |
+|---|---|
+| How tranching works in general | [`01-fundamentals`](./01-fundamentals/README.md) |
+| The kinds of split and how they differ | [`02-forms-of-tranching`](./02-forms-of-tranching/README.md) |
+| The shared shape, and the protocol survey | [`03-protocol-landscape`](./03-protocol-landscape/README.md) |
+| Entry, exit, gating, secondary markets | [`04-liquidity`](./04-liquidity/README.md) |
+| Specifications and their adoption | [`05-token-standards`](./05-token-standards/README.md) |
+| Optimizations alongside tranching, and unverified terms | [`06-optimizations`](./06-optimizations/README.md) |
+| A close reading of one protocol | A numbered study directory |
+| A source worth recording | [`SOURCES.md`](./SOURCES.md) |
 
-By contributing you agree that your contributions are licensed under the repository's dual scheme: **CC-BY-4.0** for spec/prose content and **MIT** for code (see [`LICENSE`](./LICENSE) and [`LICENSE-SPEC`](./LICENSE-SPEC)).
+A new protocol study is a new numbered directory containing one `README.md`, added to the
+table in the root [`README.md`](./README.md).
+
+## Standards for material
+
+Cite a primary source where one exists, at the point the claim is made. Prefer a
+protocol's technical documentation, a public repository, or an independent review over a
+secondary write up.
+
+Say when something is unverified. Several passages here carry an explicit note that a
+figure or a token standard could not be confirmed, and that is strongly preferred to a
+confident guess. Terms with no source at all belong in
+[`06-optimizations`](./06-optimizations/README.md).
+
+Describe live systems. Where a protocol has replaced the architecture it became known
+for, the current one is the subject and the earlier one appears only where the current one
+cannot be understood without it.
+
+Leave implementation detail to the protocols. Contract inventories, addresses and source
+excerpts are not reproduced here. Where a design decision has an economic consequence,
+record the consequence.
+
+Write in stacked paragraphs with headings that are statements. No diagrams.
+
+## Licensing
+
+Contributions are licensed under the dual scheme of this repository: CC-BY-4.0 for prose
+and MIT for any code. See [`LICENSE`](./LICENSE) and [`LICENSE-SPEC`](./LICENSE-SPEC).
