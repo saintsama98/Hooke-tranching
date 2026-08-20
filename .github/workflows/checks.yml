@@ -1,0 +1,68 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  research:
+    name: link and structure checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check internal links, structure and conventions
+        run: |
+          python3 - <<'PY'
+          import os, re, glob, sys
+
+          SKIP = ('Hooke-centrifuge-lender',)
+          files = [f for f in glob.glob('**/*.md', recursive=True)
+                   if not f.startswith(SKIP)]
+          fail = []
+
+          # 1. every relative link resolves
+          for f in files:
+              d = os.path.dirname(f)
+              for m in re.finditer(r'\[[^\]]*\]\(([^)]+)\)', open(f).read()):
+                  t = m.group(1).split('#')[0]
+                  if not t or t.startswith(('http://', 'https://', 'mailto:')):
+                      continue
+                  if not os.path.exists(os.path.normpath(os.path.join(d, t))):
+                      fail.append('dead link in %s -> %s' % (f, t))
+
+          # 2. each numbered research directory holds exactly one document
+          for d in sorted(glob.glob('[0-9][0-9]-*/')):
+              entries = os.listdir(d)
+              if entries != ['README.md']:
+                  fail.append('%s should hold exactly one README.md, found %s' % (d, entries))
+
+          # 3. every research directory is reachable from the root README
+          root = open('README.md').read()
+          for d in sorted(glob.glob('[0-9][0-9]-*/')):
+              if d.rstrip('/') not in root:
+                  fail.append('%s is not linked from README.md' % d)
+
+          # 4. headings are statements, not questions
+          for f in files:
+              for i, line in enumerate(open(f), 1):
+                  if line.startswith('#') and line.rstrip().endswith('?'):
+                      fail.append('question heading at %s:%d' % (f, i))
+
+          # 5. no diagrams or embedded images
+          for f in files:
+              if '![' in open(f).read():
+                  fail.append('embedded image in %s' % f)
+          for ext in ('svg', 'png', 'jpg', 'd2', 'mmd'):
+              for p in glob.glob('**/*.%s' % ext, recursive=True):
+                  if not p.startswith(SKIP):
+                      fail.append('diagram asset present: %s' % p)
+
+          if fail:
+              print('FAILED')
+              for x in fail:
+                  print('  ' + x)
+              sys.exit(1)
+          print('all checks passed across %d documents' % len(files))
+          PY

@@ -1,1 +1,6 @@
-Hooke-centrifuge-lender/
+# OS / editor
+.DS_Store
+.vscode/
+
+# Scratch
+*.tmp
